@@ -13,38 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.example.myapplication
 
-package com.example.myapplication;
-
-public class PoseLandMark {
-    float x,y, visible;
-    PoseLandMark(float x, float y, float visible) {
-        this.x = x;
-        this.y = y;
-        this.visible = visible;
-    }
-
-    public void setX(float x) {
-        this.x = x;
-    }
-
-    public void setY(float y) {
-        this.y = y;
-    }
-
-    public void setVisible(float visible) {
-        this.visible = visible;
-    }
-
-    public float getX() {
-        return x;
-    }
-
-    public float getY() {
-        return y;
-    }
-
-    public float getVisible() {
-        return visible;
-    }
-}
+class PoseLandMark internal constructor(var x: Float, var y: Float, var visible: Float)

@@ -12,11 +12,49 @@
         android:layout_height="fill_parent"
         android:layout_weight="1"
         tools:ignore="MissingConstraints">
+
         <TextView
             android:id="@+id/no_camera_access_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
             android:text="@string/no_camera_access" />
+
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/main_tv_work"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="temp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/main_tv_result"
+        app:layout_constraintEnd_toStartOf="@+id/main_tv_result"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:id="@+id/main_tv_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="temp"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/main_tv_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="temp"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintStart_toEndOf="@id/main_tv_result"
+        app:layout_constraintBottom_toBottomOf="@id/main_tv_result"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
