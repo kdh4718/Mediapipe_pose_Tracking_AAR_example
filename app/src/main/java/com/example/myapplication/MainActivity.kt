@@ -15,13 +15,14 @@
  */
 package com.example.myapplication
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.google.mediapipe.components.CameraHelper.CameraFacing
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList
 import com.example.myapplication.PoseLandMark
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmark
 import com.example.myapplication.MainActivity
-import android.graphics.SurfaceTexture
 import android.view.SurfaceView
 import com.google.mediapipe.glutil.EglManager
 import com.google.mediapipe.components.FrameProcessor
@@ -30,6 +31,7 @@ import android.content.pm.ApplicationInfo
 import com.google.mediapipe.components.CameraXPreviewHelper
 import android.os.Bundle
 import android.content.pm.PackageManager
+import android.graphics.*
 import android.util.Log
 import android.util.Size
 import com.google.mediapipe.framework.AndroidAssetUtil
@@ -52,6 +54,7 @@ import java.util.*
 /**
  * Main activity of MediaPipe example apps.
  */
+
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
@@ -62,6 +65,8 @@ class MainActivity : AppCompatActivity() {
         private const val NUM_HANDS = 2
         private val CAMERA_FACING = CameraFacing.BACK
         private var tts : TextToSpeech? = null  // tts 객체
+        lateinit var wrongLineLandMarkLeft : ArrayList<Float>
+        lateinit var wrongLineLandMarkRight : ArrayList<Float>
 
         // Flips the camera-preview frames vertically before sending them into FrameProcessor to be
         // processed in a MediaPipe graph, and flips the processed frames back when they are displayed.
@@ -170,6 +175,8 @@ class MainActivity : AppCompatActivity() {
     private var state = "down"
     private var cnt = 0
 
+
+    @SuppressLint("WrongCall")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(contentViewLayoutResId)
@@ -219,9 +226,10 @@ class MainActivity : AppCompatActivity() {
                     "[TS:" + packet.timestamp + "] " + getPoseLandmarksDebugString(poseLandmarks)
                 )
                 val srh = previewDisplayView!!.holder
+
                 //
 //                  -- this line cannot Running --
-//                    Canvas canvas = null;
+//                    Canvas canvas = null
 //                    try {
 //                        canvas= srh.lockCanvas();
 //                        synchronized(srh){
@@ -259,30 +267,42 @@ class MainActivity : AppCompatActivity() {
                 val angle1 = getAngle(poseMarkers[14], poseMarkers[12], poseMarkers[24])
                 val angle2 = getAngle(poseMarkers[13], poseMarkers[11], poseMarkers[23])
 
-                if(poseLandmarks.landmarkList[12].z > -0.5){
-                    if(angle1 < 40 && angle2 < 40 && (state =="up" || state=="high")){
-                        state="down"
-                    }
-                    if(angle1 < 40 && angle2 < 40 && state=="middle"){
-                        state="down"
-                        speak("팔이 너무 낮습니다")
-                    }
-                    if(angle1 >= 40 && angle2 >= 40 && state=="down"){
-                        state = "middle"
-                    }
-                    if(angle1 > 90 && angle2 > 90 && state=="middle"){
-                        state = "up"
-                        cnt += 1
-                    }
-                    if(angle1 > 110 && angle2 > 110 && state=="up"){
-                        state = "high"
-                        cnt -= 1
-                        speak("팔이 너무 높습니다")
-                    }
-                }
+                if(angle1 < 40 && angle2 < 40 && (state =="up" || state=="high")){
 
+                    state="down"
+
+                }
+                if(angle1 < 40 && angle2 < 40 && state=="middle"){
+                    state="down"
+                    speak("팔이 너무 낮습니다")
+                }
+                if(angle1 >= 40 && angle2 >= 40 && state=="down"){
+                    wrongLineLandMarkLeft.add(12f)
+                    wrongLineLandMarkLeft.add(14f)
+                    wrongLineLandMarkLeft.add(16f)
+                    wrongLineLandMarkRight.add(11f)
+                    wrongLineLandMarkRight.add(13f)
+                    wrongLineLandMarkRight.add(15f)
+                    state = "middle"
+                }
+                if(angle1 > 90 && angle2 > 90 && state=="middle"){
+                    wrongLineLandMarkLeft.clear()
+                    wrongLineLandMarkRight.clear()
+                    state = "up"
+                    cnt += 1
+                }
+                if(angle1 > 110 && angle2 > 110 && state=="up"){
+                    state = "high"
+                    cnt -= 1
+                    speak("팔이 너무 높습니다")
+                }
+                //val draw = onDraw(this)
+
+                //draw.onDraw(canvas, poseLandmarks.landmarkList[12].x, poseLandmarks.landmarkList[12].y, poseLandmarks.landmarkList[11].x, poseLandmarks.landmarkList[11].y)
                 runOnUiThread {
-                    main_tv_work.text = poseLandmarks.landmarkList[12].z.toString()
+                    //setContentView(onDraw(this))
+                    addContentView(onDraw(this), ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+                    main_tv_work.text = "사레레"
                     main_tv_result.text = state
                     //main_tv_result.text = poseLandmarks.landmarkList[12].z.toString()
                     main_tv_state.text = cnt.toString()
@@ -299,6 +319,25 @@ class MainActivity : AppCompatActivity() {
                 }
         );*/PermissionHelper.checkAndRequestCameraPermissions(this)
     }
+    public class onDraw(context: Context) : View(context){
+        override fun onDraw(canvas: Canvas?) {
+            super.onDraw(canvas)
+            var whitePaint: Paint
+            whitePaint = Paint()
+            // whitePaint.strokeWidth = STROKE_WIDTH
+            //Log.e("draw", startX.toString())
+            whitePaint.color = Color.RED
+
+            val rect = RectF()
+            rect.set(50f, 450f, 400f, 800f)
+            canvas?.drawRect(rect, whitePaint)
+            if (canvas != null){
+
+                //canvas.drawLine(startX*100, startY*100, stopX*100, stopY*100, whitePaint)
+            }
+        }
+    }
+
 
     // tts 출력
     fun speak(string: String){
