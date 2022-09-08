@@ -49,7 +49,9 @@ import com.google.mediapipe.framework.Packet
 import org.w3c.dom.Text
 
 import android.speech.tts.TextToSpeech
+import android.util.TypedValue
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Main activity of MediaPipe example apps.
@@ -65,8 +67,10 @@ class MainActivity : AppCompatActivity() {
         private const val NUM_HANDS = 2
         private val CAMERA_FACING = CameraFacing.BACK
         private var tts : TextToSpeech? = null  // tts 객체
-        lateinit var wrongLineLandMarkLeft : ArrayList<Float>
-        lateinit var wrongLineLandMarkRight : ArrayList<Float>
+        var wrongLineLandMarkLeftx : ArrayList<Float> = ArrayList()
+        var wrongLineLandMarkLefty : ArrayList<Float> = ArrayList()
+        var wrongLineLandMarkRightx : ArrayList<Float> = ArrayList()
+        var wrongLineLandMarkRighty : ArrayList<Float> = ArrayList()
 
         // Flips the camera-preview frames vertically before sending them into FrameProcessor to be
         // processed in a MediaPipe graph, and flips the processed frames back when they are displayed.
@@ -266,6 +270,7 @@ class MainActivity : AppCompatActivity() {
                 // 사레레
                 val angle1 = getAngle(poseMarkers[14], poseMarkers[12], poseMarkers[24])
                 val angle2 = getAngle(poseMarkers[13], poseMarkers[11], poseMarkers[23])
+                var state1 = 0
 
                 if(angle1 < 40 && angle2 < 40 && (state =="up" || state=="high")){
 
@@ -277,17 +282,31 @@ class MainActivity : AppCompatActivity() {
                     speak("팔이 너무 낮습니다")
                 }
                 if(angle1 >= 40 && angle2 >= 40 && state=="down"){
-                    wrongLineLandMarkLeft.add(12f)
-                    wrongLineLandMarkLeft.add(14f)
-                    wrongLineLandMarkLeft.add(16f)
-                    wrongLineLandMarkRight.add(11f)
-                    wrongLineLandMarkRight.add(13f)
-                    wrongLineLandMarkRight.add(15f)
+                    if(wrongLineLandMarkLeftx.size==0){
+                        wrongLineLandMarkLeftx.add(dpToPx(this, poseMarkers[12].x))
+                        wrongLineLandMarkLeftx.add(dpToPx(this, poseMarkers[14].x))
+                        wrongLineLandMarkLeftx.add(dpToPx(this, poseMarkers[16].x))
+
+                        wrongLineLandMarkLefty.add(dpToPx(this, poseMarkers[12].y))
+                        wrongLineLandMarkLefty.add(dpToPx(this, poseMarkers[14].y))
+                        wrongLineLandMarkLefty.add(dpToPx(this, poseMarkers[16].y))
+
+                        wrongLineLandMarkRightx.add(dpToPx(this, poseMarkers[11].x))
+                        wrongLineLandMarkRightx.add(dpToPx(this, poseMarkers[13].x))
+                        wrongLineLandMarkRightx.add(dpToPx(this, poseMarkers[15].x))
+
+                        wrongLineLandMarkRighty.add(dpToPx(this, poseMarkers[11].y))
+                        wrongLineLandMarkRighty.add(dpToPx(this, poseMarkers[13].y))
+                        wrongLineLandMarkRighty.add(dpToPx(this, poseMarkers[15].y))
+                    }
+
                     state = "middle"
                 }
                 if(angle1 > 90 && angle2 > 90 && state=="middle"){
-                    wrongLineLandMarkLeft.clear()
-                    wrongLineLandMarkRight.clear()
+                    wrongLineLandMarkLeftx.clear()
+                    wrongLineLandMarkLefty.clear()
+                    wrongLineLandMarkRightx.clear()
+                    wrongLineLandMarkRighty.clear()
                     state = "up"
                     cnt += 1
                 }
@@ -301,6 +320,7 @@ class MainActivity : AppCompatActivity() {
                 //draw.onDraw(canvas, poseLandmarks.landmarkList[12].x, poseLandmarks.landmarkList[12].y, poseLandmarks.landmarkList[11].x, poseLandmarks.landmarkList[11].y)
                 runOnUiThread {
                     //setContentView(onDraw(this))
+                    // 원래 화면 위에 추가 뷰 생성
                     addContentView(onDraw(this), ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
                     main_tv_work.text = "사레레"
                     main_tv_result.text = state
@@ -319,6 +339,12 @@ class MainActivity : AppCompatActivity() {
                 }
         );*/PermissionHelper.checkAndRequestCameraPermissions(this)
     }
+    // 랜드마크 위치 화면에 맞게 픽셀로 변환
+    fun dpToPx(context: Context, dp: Float): Float {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
+    }
+    
+    // 추가 선 그리기
     public class onDraw(context: Context) : View(context){
         override fun onDraw(canvas: Canvas?) {
             super.onDraw(canvas)
@@ -327,14 +353,22 @@ class MainActivity : AppCompatActivity() {
             // whitePaint.strokeWidth = STROKE_WIDTH
             //Log.e("draw", startX.toString())
             whitePaint.color = Color.RED
+            whitePaint.strokeWidth = 100F
 
-            val rect = RectF()
-            rect.set(50f, 450f, 400f, 800f)
-            canvas?.drawRect(rect, whitePaint)
-            if (canvas != null){
-
-                //canvas.drawLine(startX*100, startY*100, stopX*100, stopY*100, whitePaint)
+            /*
+            for(i:Int in 0..250 step 10){
+                canvas?.drawLine(i.toFloat(), i.toFloat(), (i+200).toFloat(),(i+200).toFloat(), whitePaint)
+                //canvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                Log.e("line", i.toString())
             }
+             */
+            for (i: Int in 0..(wrongLineLandMarkLeftx.size-2)){
+                canvas?.drawLine(wrongLineLandMarkLeftx[i], wrongLineLandMarkLefty[i], wrongLineLandMarkLeftx[i+1], wrongLineLandMarkLefty[i+1], whitePaint)
+                canvas?.drawLine(wrongLineLandMarkRightx[i], wrongLineLandMarkRighty[i], wrongLineLandMarkRightx[i+1], wrongLineLandMarkRighty[i+1], whitePaint)
+                canvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                Log.e("line", wrongLineLandMarkLeftx[i].toString())
+            }
+
         }
     }
 
