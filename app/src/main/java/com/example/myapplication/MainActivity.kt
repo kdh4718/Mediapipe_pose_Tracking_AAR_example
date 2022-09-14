@@ -67,10 +67,12 @@ class MainActivity : AppCompatActivity() {
         private const val NUM_HANDS = 2
         private val CAMERA_FACING = CameraFacing.BACK
         private var tts : TextToSpeech? = null  // tts 객체
+
         var wrongLineLandMarkLeftx : ArrayList<Float> = ArrayList()
         var wrongLineLandMarkLefty : ArrayList<Float> = ArrayList()
         var wrongLineLandMarkRightx : ArrayList<Float> = ArrayList()
         var wrongLineLandMarkRighty : ArrayList<Float> = ArrayList()
+
 
         // Flips the camera-preview frames vertically before sending them into FrameProcessor to be
         // processed in a MediaPipe graph, and flips the processed frames back when they are displayed.
@@ -176,7 +178,7 @@ class MainActivity : AppCompatActivity() {
     // Handles camera access via the {@link CameraX} Jetpack support library.
     private var cameraHelper: CameraXPreviewHelper? = null
 
-    private var state = "down"
+
     private var cnt = 0
 
 
@@ -231,7 +233,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 val srh = previewDisplayView!!.holder
 
-                //
+
 //                  -- this line cannot Running --
 //                    Canvas canvas = null
 //                    try {
@@ -249,6 +251,7 @@ class MainActivity : AppCompatActivity() {
 ////                    processor.getVideoSurfaceOutput().setSurface(srh.getSurface());
 
                 val poseMarkers = ArrayList<PoseLandMark>()
+                var state = "down"
                 var landmarkIndex = 0
                 for (landmark in poseLandmarks.landmarkList) {
                     val marker = PoseLandMark(landmark.x, landmark.y, landmark.visibility)
@@ -270,10 +273,9 @@ class MainActivity : AppCompatActivity() {
                 // 사레레
                 val angle1 = getAngle(poseMarkers[14], poseMarkers[12], poseMarkers[24])
                 val angle2 = getAngle(poseMarkers[13], poseMarkers[11], poseMarkers[23])
-                var state1 = 0
+                //var state1 = 0
 
                 if(angle1 < 40 && angle2 < 40 && (state =="up" || state=="high")){
-
                     state="down"
 
                 }
@@ -283,31 +285,32 @@ class MainActivity : AppCompatActivity() {
                 }
                 if(angle1 >= 40 && angle2 >= 40 && state=="down"){
                     if(wrongLineLandMarkLeftx.size==0){
-                        wrongLineLandMarkLeftx.add(dpToPx(this, poseMarkers[12].x))
-                        wrongLineLandMarkLeftx.add(dpToPx(this, poseMarkers[14].x))
-                        wrongLineLandMarkLeftx.add(dpToPx(this, poseMarkers[16].x))
+                        wrongLineLandMarkLeftx.add(poseMarkers[12].x)
+                        wrongLineLandMarkLeftx.add(poseMarkers[14].x)
+                        wrongLineLandMarkLeftx.add(poseMarkers[16].x)
 
-                        wrongLineLandMarkLefty.add(dpToPx(this, poseMarkers[12].y))
-                        wrongLineLandMarkLefty.add(dpToPx(this, poseMarkers[14].y))
-                        wrongLineLandMarkLefty.add(dpToPx(this, poseMarkers[16].y))
+                        wrongLineLandMarkLefty.add(poseMarkers[12].y)
+                        wrongLineLandMarkLefty.add(poseMarkers[14].y)
+                        wrongLineLandMarkLefty.add(poseMarkers[16].y)
 
-                        wrongLineLandMarkRightx.add(dpToPx(this, poseMarkers[11].x))
-                        wrongLineLandMarkRightx.add(dpToPx(this, poseMarkers[13].x))
-                        wrongLineLandMarkRightx.add(dpToPx(this, poseMarkers[15].x))
+                        wrongLineLandMarkRightx.add(poseMarkers[11].x)
+                        wrongLineLandMarkRightx.add(poseMarkers[13].x)
+                        wrongLineLandMarkRightx.add(poseMarkers[15].x)
 
-                        wrongLineLandMarkRighty.add(dpToPx(this, poseMarkers[11].y))
-                        wrongLineLandMarkRighty.add(dpToPx(this, poseMarkers[13].y))
-                        wrongLineLandMarkRighty.add(dpToPx(this, poseMarkers[15].y))
+                        wrongLineLandMarkRighty.add(poseMarkers[11].y)
+                        wrongLineLandMarkRighty.add(poseMarkers[13].y)
+                        wrongLineLandMarkRighty.add(poseMarkers[15].y)
                     }
 
                     state = "middle"
                 }
                 if(angle1 > 90 && angle2 > 90 && state=="middle"){
+                    state = "up"
                     wrongLineLandMarkLeftx.clear()
                     wrongLineLandMarkLefty.clear()
                     wrongLineLandMarkRightx.clear()
                     wrongLineLandMarkRighty.clear()
-                    state = "up"
+
                     cnt += 1
                 }
                 if(angle1 > 110 && angle2 > 110 && state=="up"){
@@ -353,20 +356,16 @@ class MainActivity : AppCompatActivity() {
             // whitePaint.strokeWidth = STROKE_WIDTH
             //Log.e("draw", startX.toString())
             whitePaint.color = Color.RED
-            whitePaint.strokeWidth = 100F
+            whitePaint.strokeWidth = 50F
+            val height = resources.displayMetrics.heightPixels
+            val width = resources.displayMetrics.widthPixels
 
-            /*
-            for(i:Int in 0..250 step 10){
-                canvas?.drawLine(i.toFloat(), i.toFloat(), (i+200).toFloat(),(i+200).toFloat(), whitePaint)
-                //canvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-                Log.e("line", i.toString())
-            }
-             */
-            for (i: Int in 0..(wrongLineLandMarkLeftx.size-2)){
-                canvas?.drawLine(wrongLineLandMarkLeftx[i], wrongLineLandMarkLefty[i], wrongLineLandMarkLeftx[i+1], wrongLineLandMarkLefty[i+1], whitePaint)
-                canvas?.drawLine(wrongLineLandMarkRightx[i], wrongLineLandMarkRighty[i], wrongLineLandMarkRightx[i+1], wrongLineLandMarkRighty[i+1], whitePaint)
-                canvas?.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-                Log.e("line", wrongLineLandMarkLeftx[i].toString())
+            if(wrongLineLandMarkLeftx.size != 0){
+                canvas?.drawLine(wrongLineLandMarkLeftx[0]*width, wrongLineLandMarkLefty[0]*height, wrongLineLandMarkLeftx[1]*width, wrongLineLandMarkLefty[1]*height, whitePaint)
+                canvas?.drawLine(wrongLineLandMarkLeftx[1]*width, wrongLineLandMarkLefty[1]*height, wrongLineLandMarkLeftx[2]*width, wrongLineLandMarkLefty[2]*height, whitePaint)
+
+                invalidate()
+                Log.e("line", (wrongLineLandMarkLeftx[0]*width).toString())
             }
 
         }
