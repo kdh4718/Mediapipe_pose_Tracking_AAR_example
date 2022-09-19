@@ -32,6 +32,8 @@ import com.google.mediapipe.components.CameraXPreviewHelper
 import android.os.Bundle
 import android.content.pm.PackageManager
 import android.graphics.*
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.Size
 import com.google.mediapipe.framework.AndroidAssetUtil
@@ -284,24 +286,29 @@ class MainActivity : AppCompatActivity() {
                     speak("팔이 너무 낮습니다")
                 }
                 if(angle1 >= 40 && angle2 >= 40 && state=="down"){
-                    if(wrongLineLandMarkLeftx.size==0){
-                        wrongLineLandMarkLeftx.add(poseMarkers[12].x)
-                        wrongLineLandMarkLeftx.add(poseMarkers[14].x)
-                        wrongLineLandMarkLeftx.add(poseMarkers[16].x)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if(wrongLineLandMarkLeftx.size==0){
+                            wrongLineLandMarkLeftx.add(poseMarkers[12].x)
+                            wrongLineLandMarkLeftx.add(poseMarkers[14].x)
+                            wrongLineLandMarkLeftx.add(poseMarkers[16].x)
 
-                        wrongLineLandMarkLefty.add(poseMarkers[12].y)
-                        wrongLineLandMarkLefty.add(poseMarkers[14].y)
-                        wrongLineLandMarkLefty.add(poseMarkers[16].y)
+                            wrongLineLandMarkLefty.add(poseMarkers[12].y)
+                            wrongLineLandMarkLefty.add(poseMarkers[14].y)
+                            wrongLineLandMarkLefty.add(poseMarkers[16].y)
 
-                        wrongLineLandMarkRightx.add(poseMarkers[11].x)
-                        wrongLineLandMarkRightx.add(poseMarkers[13].x)
-                        wrongLineLandMarkRightx.add(poseMarkers[15].x)
+                            wrongLineLandMarkRightx.add(poseMarkers[11].x)
+                            wrongLineLandMarkRightx.add(poseMarkers[13].x)
+                            wrongLineLandMarkRightx.add(poseMarkers[15].x)
 
-                        wrongLineLandMarkRighty.add(poseMarkers[11].y)
-                        wrongLineLandMarkRighty.add(poseMarkers[13].y)
-                        wrongLineLandMarkRighty.add(poseMarkers[15].y)
-                    }
-
+                            wrongLineLandMarkRighty.add(poseMarkers[11].y)
+                            wrongLineLandMarkRighty.add(poseMarkers[13].y)
+                            wrongLineLandMarkRighty.add(poseMarkers[15].y)
+                        }
+                    }, 200)
+                    wrongLineLandMarkLeftx.clear()
+                    wrongLineLandMarkLefty.clear()
+                    wrongLineLandMarkRightx.clear()
+                    wrongLineLandMarkRighty.clear()
                     state = "middle"
                 }
                 if(angle1 > 90 && angle2 > 90 && state=="middle"){
@@ -361,8 +368,11 @@ class MainActivity : AppCompatActivity() {
             val width = resources.displayMetrics.widthPixels
 
             if(wrongLineLandMarkLeftx.size != 0){
-                canvas?.drawLine(wrongLineLandMarkLeftx[0]*width, wrongLineLandMarkLefty[0]*height, wrongLineLandMarkLeftx[1]*width, wrongLineLandMarkLefty[1]*height, whitePaint)
-                canvas?.drawLine(wrongLineLandMarkLeftx[1]*width, wrongLineLandMarkLefty[1]*height, wrongLineLandMarkLeftx[2]*width, wrongLineLandMarkLefty[2]*height, whitePaint)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    canvas?.drawLine(wrongLineLandMarkLeftx[0]*width, wrongLineLandMarkLefty[0]*height, wrongLineLandMarkLeftx[1]*width, wrongLineLandMarkLefty[1]*height, whitePaint)
+                    canvas?.drawLine(wrongLineLandMarkLeftx[1]*width, wrongLineLandMarkLefty[1]*height, wrongLineLandMarkLeftx[2]*width, wrongLineLandMarkLefty[2]*height, whitePaint)
+                }, 200)
+
 
                 invalidate()
                 Log.e("line", (wrongLineLandMarkLeftx[0]*width).toString())
